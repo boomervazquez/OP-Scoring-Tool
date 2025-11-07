@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipment Scoring Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .upload-section {
+            background: #f8f9fa;
+            border: 3px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            background: #e9ecef;
+            border-color: #764ba2;
+        }
+        
+        .upload-section.dragover {
+            background: #667eea;
+            border-color: #764ba2;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .scoring-rules {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .scoring-rules h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .scoring-rules ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .scoring-rules li {
+            color: #856404;
+            padding: 8px 0;
+            font-weight: 500;
+        }
+        
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .summary-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.2s;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-port {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-rail {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .points {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .export-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚢 Shipment Scoring Tool</h1>
+        <p class="subtitle">Upload your shipment Excel file to calculate scores by OP Name</p>
+        
+        <div class="scoring-rules">
+            <h3>📊 Scoring Rules</h3>
+            <ul>
+                <li>🔵 Port CY/CY = <strong>1.0 point</strong></li>
+                <li>🟢 Rail CY/CY (includes CY/RAMP) = <strong>1.5 points</strong></li>
+                <li>🟡 Port CY/DOOR = <strong>2.0 points</strong></li>
+                <li>🟠 Rail CY/DOOR = <strong>2.5 points</strong></li>
+            </ul>
+        </div>
+        
+        <div class="upload-section" id="uploadSection">
+            <p style="font-size: 18px; color: #666; margin-bottom: 20px;">
+                📁 Drag and drop your Excel file here or click to browse
+            </p>
+            <label for="fileInput" class="upload-btn">Choose File</label>
+            <input type="file" id="fileInput" accept=".xlsx,.xls">
+            <p style="margin-top: 15px; color: #999; font-size: 14px;" id="fileName"></p>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Processing your file...</p>
+        </div>
+        
+        <div id="errorSection"></div>
+        
+        <div class="results-section" id="resultsSection">
+            <h2 style="margin-bottom: 20px; color: #333;">📈 Results</h2>
+            
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h3>Total Shipments</h3>
+                    <div class="value" id="totalShipments">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Points</h3>
+                    <div class="value" id="totalPoints">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Average Points</h3>
+                    <div class="value" id="avgPoints">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>OP Count</h3>
+                    <div class="value" id="opCount">0</div>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333;">Points by OP Name</h3>
+            <table id="opTable">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>OP Name</th>
+                        <th>Shipments</th>
+                        <th>Total Points</th>
+                        <th>Average Points</th>
+                    </tr>
+                </thead>
+                <tbody id="opTableBody">
+                </tbody>
+            </table>
+            
+            <h3 style="margin-top: 40px; margin-bottom: 15px; color: #333;">Detailed Breakdown</h3>
+            <table id="detailTable">
+                <thead>
+                    <tr>
+                        <th>File No.</th>
+                        <th>OP Name</th>
+                        <th>Cargo Location</th>
+                        <th>Service</th>
+                        <th>Category</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody id="detailTableBody">
+                </tbody>
+            </table>
+            
+            <button class="export-btn" onclick="exportResults()">📥 Export Results to Excel</button>
+        </div>
+    </div>
+
+    <script>
+        // Rail location keywords
+        const railKeywords = ['BNSF', 'UPRR', 'CSX', 'NSRR', 'CN RAIL', 'CP RAIL', 'CPRAI', 'CNRAI'];
+        
+        let processedData = [];
+        let opScores = {};
+        
+        // File input handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const fileName = document.getElementById('fileName');
+        
+        fileInput.addEventListener('change', handleFile);
+        
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+        
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+        
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                processFile(file);
+            }
+        });
+        
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+        
+        function processFile(file) {
+            fileName.textContent = `Selected: ${file.name}`;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('errorSection').innerHTML = '';
+            document.getElementById('resultsSection').style.display = 'none';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+                    
+                    processData(jsonData);
+                } catch (error) {
+                    showError('Error processing file: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function isRailLocation(location) {
+            if (!location) return false;
+            const locUpper = location.toString().toUpperCase();
+            return railKeywords.some(keyword => locUpper.includes(keyword));
+        }
+        
+        function categorizeAndScore(cargoLocation, service) {
+            if (!cargoLocation || !service) {
+                return { category: 'Unknown', points: 0 };
+            }
+            
+            const isRail = isRailLocation(cargoLocation);
+            const serviceUpper = service.toString().toUpperCase();
+            
+            // Rail CY/CY or CY/RAMP
+            if (isRail && (serviceUpper.includes('CY/CY') || serviceUpper.includes('CY/RAMP'))) {
+                return { category: 'Rail CY/CY', points: 1.5, type: 'rail' };
+            }
+            
+            // Rail CY/DOOR
+            if (isRail && serviceUpper.includes('CY/DOOR')) {
+                return { category: 'Rail CY/DOOR', points: 2.5, type: 'rail' };
+            }
+            
+            // Port CY/CY
+            if (!isRail && serviceUpper.includes('CY/CY')) {
+                return { category: 'Port CY/CY', points: 1.0, type: 'port' };
+            }
+            
+            // Port CY/DOOR
+            if (!isRail && serviceUpper.includes('CY/DOOR')) {
+                return { category: 'Port CY/DOOR', points: 2.0, type: 'port' };
+            }
+            
+            return { category: 'Other', points: 0, type: 'other' };
+        }
+        
+        function processData(data) {
+            try {
+                // Find header row (row 2, index 1)
+                const headers = data[1];
+                
+                // Find column indices
+                const fileNoIdx = headers.indexOf('File No.');
+                const opNameIdx = headers.indexOf('OP Name');
+                const cargoLocationIdx = headers.indexOf('Cargo Location');
+                const serviceIdx = headers.indexOf('Service');
+                
+                if (fileNoIdx === -1 || opNameIdx === -1 || cargoLocationIdx === -1 || serviceIdx === -1) {
+                    throw new Error('Required columns not found. Please ensure your file has: File No., OP Name, Cargo Location, and Service columns.');
+                }
+                
+                processedData = [];
+                opScores = {};
+                
+                // Process data rows (start from row 3, index 2)
+                for (let i = 2; i < data.length; i++) {
+                    const row = data[i];
+                    
+                    const fileNo = row[fileNoIdx];
+                    const opName = row[opNameIdx];
+                    const cargoLocation = row[cargoLocationIdx];
+                    const service = row[serviceIdx];
+                    
+                    // Skip empty rows
+                    if (!fileNo && !opName) continue;
+                    
+                    const result = categorizeAndScore(cargoLocation, service);
+                    
+                    const record = {
+                        fileNo: fileNo || '',
+                        opName: opName || 'Unknown',
+                        cargoLocation: cargoLocation || '',
+                        service: service || '',
+                        category: result.category,
+                        points: result.points,
+                        type: result.type
+                    };
+                    
+                    processedData.push(record);
+                    
+                    // Aggregate by OP Name
+                    if (!opScores[record.opName]) {
+                        opScores[record.opName] = {
+                            totalPoints: 0,
+                            shipments: 0
+                        };
+                    }
+                    
+                    opScores[record.opName].totalPoints += result.points;
+                    opScores[record.opName].shipments += 1;
+                }
+                
+                displayResults();
+                document.getElementById('loading').style.display = 'none';
+                
+            } catch (error) {
+                showError('Error processing data: ' + error.message);
+            }
+        }
+        
+        function displayResults() {
+            // Calculate summary stats
+            const totalShipments = processedData.length;
+            const totalPoints = processedData.reduce((sum, r) => sum + r.points, 0);
+            const avgPoints = totalShipments > 0 ? (totalPoints / totalShipments).toFixed(2) : 0;
+            const opCount = Object.keys(opScores).length;
+            
+            document.getElementById('totalShipments').textContent = totalShipments;
+            document.getElementById('totalPoints').textContent = totalPoints.toFixed(1);
+            document.getElementById('avgPoints').textContent = avgPoints;
+            document.getElementById('opCount').textContent = opCount;
+            
+            // Sort OP scores by total points descending
+            const sortedOps = Object.entries(opScores)
+                .sort((a, b) => b[1].totalPoints - a[1].totalPoints);
+            
+            // Populate OP table
+            const opTableBody = document.getElementById('opTableBody');
+            opTableBody.innerHTML = '';
+            
+            sortedOps.forEach(([opName, data], index) => {
+                const avgPts = (data.totalPoints / data.shipments).toFixed(2);
+                const row = `
+                    <tr>
+                        <td><strong>${index + 1}</strong></td>
+                        <td><strong>${opName}</strong></td>
+                        <td>${data.shipments}</td>
+                        <td class="points">${data.totalPoints.toFixed(1)}</td>
+                        <td>${avgPts}</td>
+                    </tr>
+                `;
+                opTableBody.innerHTML += row;
+            });
+            
+            // Populate detail table
+            const detailTableBody = document.getElementById('detailTableBody');
+            detailTableBody.innerHTML = '';
+            
+            processedData.forEach(record => {
+                const badgeClass = record.type === 'rail' ? 'badge-rail' : 'badge-port';
+                const row = `
+                    <tr>
+                        <td>${record.fileNo}</td>
+                        <td><strong>${record.opName}</strong></td>
+                        <td style="font-size: 12px;">${record.cargoLocation}</td>
+                        <td>${record.service}</td>
+                        <td><span class="badge ${badgeClass}">${record.category}</span></td>
+                        <td class="points">${record.points.toFixed(1)}</td>
+                    </tr>
+                `;
+                detailTableBody.innerHTML += row;
+            });
+            
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('errorSection').innerHTML = `
+                <div class="error">
+                    <strong>⚠️ Error:</strong> ${message}
+                </div>
+            `;
+        }
+        
+        function exportResults() {
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Sheet 1: OP Summary
+            const sortedOps = Object.entries(opScores)
+                .sort((a, b) => b[1].totalPoints - a[1].totalPoints);
+            
+            const summaryData = [
+                ['Rank', 'OP Name', 'Shipments', 'Total Points', 'Average Points']
+            ];
+            
+            sortedOps.forEach(([opName, data], index) => {
+                summaryData.push([
+                    index + 1,
+                    opName,
+                    data.shipments,
+                    parseFloat(data.totalPoints.toFixed(2)),
+                    parseFloat((data.totalPoints / data.shipments).toFixed(2))
+                ]);
+            });
+            
+            const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, ws1, 'OP Summary');
+            
+            // Sheet 2: Detailed Breakdown
+            const detailData = [
+                ['File No.', 'OP Name', 'Cargo Location', 'Service', 'Category', 'Points']
+            ];
+            
+            processedData.forEach(record => {
+                detailData.push([
+                    record.fileNo,
+                    record.opName,
+                    record.cargoLocation,
+                    record.service,
+                    record.category,
+                    record.points
+                ]);
+            });
+            
+            const ws2 = XLSX.utils.aoa_to_sheet(detailData);
+            XLSX.utils.book_append_sheet(wb, ws2, 'Detailed Breakdown');
+            
+            // Export
+            XLSX.writeFile(wb, 'shipment_scores.xlsx');
+        }
+    </script>
+</body>
+</html>
