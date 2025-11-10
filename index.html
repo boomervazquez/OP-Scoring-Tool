@@ -257,6 +257,8 @@
                 <li>🟢 Rail CY/CY (includes CY/RAMP) = <strong>1.5 points</strong></li>
                 <li>🟡 Port CY/DOOR = <strong>2.0 points</strong></li>
                 <li>🟠 Rail CY/DOOR = <strong>2.5 points</strong></li>
+                <li>🟣 CFS/CFS (no door) = <strong>1.0 point</strong></li>
+                <li>🟤 CFS/CFS (door) = <strong>2.0 points</strong></li>
             </ul>
         </div>
         
@@ -288,14 +290,6 @@
                     <h3>Total Points</h3>
                     <div class="value" id="totalPoints">0</div>
                 </div>
-                <div class="summary-card">
-                    <h3>Average Points</h3>
-                    <div class="value" id="avgPoints">0</div>
-                </div>
-                <div class="summary-card">
-                    <h3>OP Count</h3>
-                    <div class="value" id="opCount">0</div>
-                </div>
             </div>
             
             <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333;">Points by OP Name</h3>
@@ -306,7 +300,6 @@
                         <th>OP Name</th>
                         <th>Shipments</th>
                         <th>Total Points</th>
-                        <th>Average Points</th>
                     </tr>
                 </thead>
                 <tbody id="opTableBody">
@@ -409,6 +402,16 @@
             const isRail = isRailLocation(cargoLocation);
             const serviceUpper = service.toString().toUpperCase();
             
+            // CFS/CFS with DOOR
+            if (serviceUpper.includes('CFS/CFS') && serviceUpper.includes('DOOR')) {
+                return { category: 'CFS/CFS (Door)', points: 2.0, type: 'cfs' };
+            }
+            
+            // CFS/CFS without DOOR
+            if (serviceUpper.includes('CFS/CFS')) {
+                return { category: 'CFS/CFS', points: 1.0, type: 'cfs' };
+            }
+            
             // Rail CY/CY or CY/RAMP
             if (isRail && (serviceUpper.includes('CY/CY') || serviceUpper.includes('CY/RAMP'))) {
                 return { category: 'Rail CY/CY', points: 1.5, type: 'rail' };
@@ -500,13 +503,9 @@
             // Calculate summary stats
             const totalShipments = processedData.length;
             const totalPoints = processedData.reduce((sum, r) => sum + r.points, 0);
-            const avgPoints = totalShipments > 0 ? (totalPoints / totalShipments).toFixed(2) : 0;
-            const opCount = Object.keys(opScores).length;
             
             document.getElementById('totalShipments').textContent = totalShipments;
             document.getElementById('totalPoints').textContent = totalPoints.toFixed(1);
-            document.getElementById('avgPoints').textContent = avgPoints;
-            document.getElementById('opCount').textContent = opCount;
             
             // Sort OP scores by total points descending
             const sortedOps = Object.entries(opScores)
@@ -517,14 +516,12 @@
             opTableBody.innerHTML = '';
             
             sortedOps.forEach(([opName, data], index) => {
-                const avgPts = (data.totalPoints / data.shipments).toFixed(2);
                 const row = `
                     <tr>
                         <td><strong>${index + 1}</strong></td>
                         <td><strong>${opName}</strong></td>
                         <td>${data.shipments}</td>
                         <td class="points">${data.totalPoints.toFixed(1)}</td>
-                        <td>${avgPts}</td>
                     </tr>
                 `;
                 opTableBody.innerHTML += row;
@@ -535,7 +532,7 @@
             detailTableBody.innerHTML = '';
             
             processedData.forEach(record => {
-                const badgeClass = record.type === 'rail' ? 'badge-rail' : 'badge-port';
+                const badgeClass = record.type === 'rail' ? 'badge-rail' : (record.type === 'cfs' ? 'badge-port' : 'badge-port');
                 const row = `
                     <tr>
                         <td>${record.fileNo}</td>
@@ -570,7 +567,7 @@
                 .sort((a, b) => b[1].totalPoints - a[1].totalPoints);
             
             const summaryData = [
-                ['Rank', 'OP Name', 'Shipments', 'Total Points', 'Average Points']
+                ['Rank', 'OP Name', 'Shipments', 'Total Points']
             ];
             
             sortedOps.forEach(([opName, data], index) => {
@@ -578,8 +575,7 @@
                     index + 1,
                     opName,
                     data.shipments,
-                    parseFloat(data.totalPoints.toFixed(2)),
-                    parseFloat((data.totalPoints / data.shipments).toFixed(2))
+                    parseFloat(data.totalPoints.toFixed(2))
                 ]);
             });
             
