@@ -437,8 +437,23 @@
         
         function processData(data) {
             try {
-                // Find header row (row 2, index 1)
-                const headers = data[1];
+                // Find header row - try multiple rows
+                let headers = null;
+                let headerRowIndex = -1;
+                
+                // Check first few rows for headers
+                for (let i = 0; i < Math.min(5, data.length); i++) {
+                    const row = data[i];
+                    if (row && row.some(cell => cell === 'File No.' || cell === 'OP Name')) {
+                        headers = row;
+                        headerRowIndex = i;
+                        break;
+                    }
+                }
+                
+                if (!headers) {
+                    throw new Error('Could not find header row. Please ensure your file has column headers.');
+                }
                 
                 // Find column indices
                 const fileNoIdx = headers.indexOf('File No.');
@@ -453,8 +468,8 @@
                 processedData = [];
                 opScores = {};
                 
-                // Process data rows (start from row 3, index 2)
-                for (let i = 2; i < data.length; i++) {
+                // Process data rows (start from row after headers)
+                for (let i = headerRowIndex + 1; i < data.length; i++) {
                     const row = data[i];
                     
                     const fileNo = row[fileNoIdx];
