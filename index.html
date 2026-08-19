@@ -478,15 +478,17 @@
             border-top: none;
         }
 
-        tbody tr:nth-child(even) {
-            background: var(--surface-alt);
-        }
-
         tbody tr {
             transition: background .15s ease;
         }
 
-        tbody tr:hover {
+        /* Striping/hover are scoped per table: the OP table interleaves hidden
+           drill-down rows, so nth-child() would land on the wrong rows. */
+        #detailTable tbody tr:nth-child(even) {
+            background: var(--surface-alt);
+        }
+
+        #detailTable tbody tr:hover {
             background: var(--tint-orange);
         }
 
@@ -509,9 +511,205 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* ---------- OP drill-down ---------- */
+        .table-hint {
+            font-size: 13px;
+            color: var(--muted);
+            margin: -6px 0 12px;
+        }
+
+        #opTable tbody tr.op-row {
+            cursor: pointer;
+        }
+
+        #opTable tbody tr.op-row--alt {
+            background: var(--surface-alt);
+        }
+
+        #opTable tbody tr.op-row:hover,
+        #opTable tbody tr.op-row.is-open {
+            background: var(--tint-orange);
+        }
+
+        #opTable tbody tr.op-row:focus-visible {
+            outline: 2px solid var(--kln-orange);
+            outline-offset: -2px;
+        }
+
         /* Podium emphasis on the top three OPs */
-        #opTable tbody tr:nth-child(-n+3) td:nth-child(1) strong {
+        #opTable tbody tr.op-row.is-top td:nth-child(1) strong {
             color: var(--kln-orange);
+        }
+
+        .disclosure {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            margin-right: 9px;
+            color: var(--kln-mid-grey);
+            transition: transform .18s ease, color .18s ease;
+        }
+
+        .op-row.is-open .disclosure {
+            transform: rotate(90deg);
+            color: var(--kln-orange);
+        }
+
+        .op-detail[hidden] {
+            display: none;
+        }
+
+        .op-detail > td {
+            padding: 0 16px 18px;
+            background: var(--tint-orange);
+            border-top: none;
+        }
+
+        .breakdown__head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 2px 0 12px;
+        }
+
+        .breakdown__head h4 {
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--kln-dark-grey);
+        }
+
+        .linkbtn {
+            background: #fff;
+            border: 1px solid var(--kln-light-orange);
+            color: var(--kln-orange-text);
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: border-color .15s ease, background .15s ease;
+        }
+
+        .linkbtn:hover {
+            border-color: var(--kln-orange);
+            background: #fff;
+        }
+
+        .breakdown__table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border: 1px solid var(--tint-orange-2);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            font-size: 13.5px;
+        }
+
+        .breakdown__table thead {
+            background: var(--surface-alt);
+            color: var(--muted);
+        }
+
+        .breakdown__table th {
+            padding: 8px 14px;
+            font-size: 10.5px;
+            letter-spacing: .08em;
+            color: var(--muted);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .breakdown__table td {
+            padding: 8px 14px;
+            border-top: 1px solid var(--line-soft);
+            background: transparent;
+        }
+
+        .breakdown__table tbody tr:first-child td {
+            border-top: none;
+        }
+
+        .breakdown__table th:nth-child(2), .breakdown__table td:nth-child(2),
+        .breakdown__table th:nth-child(3), .breakdown__table td:nth-child(3),
+        .breakdown__table th:nth-child(4), .breakdown__table td:nth-child(4) {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .breakdown__pts {
+            font-weight: 700;
+            color: var(--kln-orange-text);
+        }
+
+        .share__track {
+            display: inline-block;
+            width: 104px;
+            height: 6px;
+            background: var(--line);
+            border-radius: 999px;
+            overflow: hidden;
+            vertical-align: middle;
+            margin-right: 9px;
+        }
+
+        .share__bar {
+            display: block;
+            height: 100%;
+            background: var(--kln-orange);
+            border-radius: 999px;
+        }
+
+        .share__pct {
+            font-size: 12px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---------- Detail table filter ---------- */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 10px 16px;
+            margin-bottom: 12px;
+            background: var(--tint-orange);
+            border: 1px solid var(--tint-orange-2);
+            border-radius: var(--radius-sm);
+            font-size: 13.5px;
+            color: var(--kln-dark-grey);
+        }
+
+        .filter-bar[hidden] {
+            display: none;
+        }
+
+        .filter-bar__note {
+            color: var(--muted);
+            font-size: 12.5px;
+        }
+
+        .filter-bar__clear {
+            flex: 0 0 auto;
+            background: var(--kln-dark-grey);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 6px 15px;
+            font-family: var(--font);
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s ease;
+        }
+
+        .filter-bar__clear:hover {
+            background: var(--kln-orange);
         }
 
         td.feu-col {
@@ -730,6 +928,7 @@
                 </div>
 
                 <h3 class="table-title">Points by OP Name</h3>
+                <p class="table-hint">Select an OP to see their shipment mix.</p>
                 <div class="table-wrap">
                     <table id="opTable">
                         <thead>
@@ -746,7 +945,11 @@
                     </table>
                 </div>
 
-                <h3 class="table-title table-title--spaced">Detailed Breakdown</h3>
+                <h3 class="table-title table-title--spaced" id="detailHeading">Detailed Breakdown</h3>
+                <div class="filter-bar" id="detailFilterBar" hidden>
+                    <span id="detailFilterText"></span>
+                    <button type="button" class="filter-bar__clear" id="detailFilterClear">Show all shipments</button>
+                </div>
                 <div class="table-wrap">
                     <table id="detailTable">
                         <thead>
@@ -779,6 +982,20 @@
         // Rail location keywords
         const railKeywords = ['BNSF', 'UPRR', 'CSX', 'NSRR', 'CN RAIL', 'CP RAIL', 'CPRAI', 'CNRAI'];
 
+        // Display order for the per-OP drill-down. categorizeAndScore only ever
+        // returns these, but anything unexpected is appended rather than dropped.
+        const CATEGORY_ORDER = [
+            'Port CY/CY', 'Rail CY/CY', 'Port CY/DOOR', 'Rail CY/DOOR',
+            'CFS/CFS', 'CFS/CFS (Door)', 'Other', 'Unknown'
+        ];
+
+        // Same badge mapping the detailed table uses.
+        function badgeFor(category) {
+            return (category === 'Rail CY/CY' || category === 'Rail CY/DOOR') ? 'badge-rail' : 'badge-port';
+        }
+
+        const CHEVRON = '<svg class="disclosure" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
+
         // Parser options. The report has ~135 columns of which we read 5, so we skip
         // the work SheetJS would otherwise do per cell: formatted text, number formats,
         // formulas, styles. `dense` stores rows as arrays instead of an address map.
@@ -802,6 +1019,8 @@
         let processedData = [];
         let opScores = {};
         let hasFeu = false;
+        let detailRowsHtml = [];   // one HTML string per record, reused when filtering
+        let detailFilter = null;   // OP name the detailed table is narrowed to
 
         // File input handling
         const fileInput = document.getElementById('fileInput');
@@ -1070,6 +1289,8 @@
 
             processedData = [];
             opScores = {};
+            detailRowsHtml = [];
+            detailFilter = null;
 
             const firstDataRow = headerRowIndex + 1;
             const totalRows = Math.max(1, data.length - firstDataRow);
@@ -1112,18 +1333,28 @@
 
                         processedData.push(record);
 
-                        // Aggregate by OP Name
-                        if (!opScores[record.opName]) {
-                            opScores[record.opName] = {
+                        // Aggregate by OP Name, and by category within each OP
+                        let bucket = opScores[record.opName];
+                        if (!bucket) {
+                            bucket = opScores[record.opName] = {
                                 totalPoints: 0,
                                 shipments: 0,
-                                feu: 0
+                                feu: 0,
+                                categories: {}
                             };
                         }
 
-                        opScores[record.opName].totalPoints += result.points;
-                        opScores[record.opName].shipments += 1;
-                        opScores[record.opName].feu += feu;
+                        bucket.totalPoints += result.points;
+                        bucket.shipments += 1;
+                        bucket.feu += feu;
+
+                        let cat = bucket.categories[record.category];
+                        if (!cat) {
+                            cat = bucket.categories[record.category] = { shipments: 0, feu: 0, points: 0 };
+                        }
+                        cat.shipments += 1;
+                        cat.feu += feu;
+                        cat.points += result.points;
                     }
                 } catch (error) {
                     showError('Error processing data: ' + error.message);
@@ -1165,6 +1396,112 @@
             })();
         }
 
+        // One expandable panel per OP: the mix of shipment categories behind
+        // that OP's totals, plus a shortcut to filter the detailed table.
+        function buildBreakdown(opName, data, index) {
+            const present = Object.keys(data.categories);
+            const ordered = CATEGORY_ORDER.filter(c => data.categories[c])
+                .concat(present.filter(c => CATEGORY_ORDER.indexOf(c) === -1));
+
+            const rows = ordered.map(function(category) {
+                const d = data.categories[category];
+                const share = data.totalPoints > 0 ? (d.points / data.totalPoints) : 0;
+                return '<tr>' +
+                    '<td><span class="badge ' + badgeFor(category) + '">' + esc(category) + '</span></td>' +
+                    '<td>' + num(d.shipments) + '</td>' +
+                    '<td class="feu-col">' + fmtFeu(d.feu) + '</td>' +
+                    '<td class="breakdown__pts">' + d.points.toFixed(1) + '</td>' +
+                    '<td><span class="share__track"><span class="share__bar" style="width:' +
+                        (share * 100).toFixed(1) + '%"></span></span>' +
+                        '<span class="share__pct">' + Math.round(share * 100) + '%</span></td>' +
+                '</tr>';
+            }).join('');
+
+            const perShipment = data.shipments > 0 ? (data.totalPoints / data.shipments) : 0;
+
+            return '<tr class="op-detail" id="opDetail-' + index + '" hidden>' +
+                '<td colspan="5">' +
+                    '<div class="breakdown__head">' +
+                        '<h4>' + esc(opName) + ' &middot; ' + perShipment.toFixed(2) + ' points per shipment</h4>' +
+                        '<button type="button" class="linkbtn" data-filter-op="' + esc(opName) + '">' +
+                            'View these ' + num(data.shipments) + ' shipments' +
+                        '</button>' +
+                    '</div>' +
+                    '<table class="breakdown__table">' +
+                        '<thead><tr>' +
+                            '<th>Category</th><th>Shipments</th>' +
+                            '<th class="feu-col">FEU</th><th>Points</th><th>Share of points</th>' +
+                        '</tr></thead>' +
+                        '<tbody>' + rows + '</tbody>' +
+                    '</table>' +
+                '</td>' +
+            '</tr>';
+        }
+
+        function toggleOpRow(row) {
+            const detail = document.getElementById(row.getAttribute('aria-controls'));
+            if (!detail) return;
+            const open = row.classList.toggle('is-open');
+            row.setAttribute('aria-expanded', open ? 'true' : 'false');
+            detail.hidden = !open;
+        }
+
+        // Narrow the detailed table to one OP. Rebuilt from the cached row HTML,
+        // so no rescoring and no re-reading the file.
+        function renderDetailTable(onDone) {
+            const bar = document.getElementById('detailFilterBar');
+            let rows;
+
+            if (detailFilter === null) {
+                rows = detailRowsHtml;
+                bar.hidden = true;
+            } else {
+                rows = [];
+                for (let i = 0; i < processedData.length; i++) {
+                    if (processedData[i].opName === detailFilter) rows.push(detailRowsHtml[i]);
+                }
+                document.getElementById('detailFilterText').innerHTML =
+                    'Showing <strong>' + esc(detailFilter) + '</strong> only &mdash; ' +
+                    num(rows.length) + ' of ' + num(processedData.length) + ' shipments. ' +
+                    '<span class="filter-bar__note">The Excel export still includes every shipment.</span>';
+                bar.hidden = false;
+            }
+
+            renderRows(document.getElementById('detailTableBody'), rows, 'Rendered', onDone || function() {});
+        }
+
+        function setDetailFilter(opName) {
+            detailFilter = opName;
+            renderDetailTable(function() {
+                document.getElementById('detailHeading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        // Delegated once - the tbody element survives every re-render.
+        document.getElementById('opTableBody').addEventListener('click', function(e) {
+            const filterBtn = e.target.closest('[data-filter-op]');
+            if (filterBtn) {
+                setDetailFilter(filterBtn.getAttribute('data-filter-op'));
+                return;
+            }
+            const row = e.target.closest('tr.op-row');
+            if (row) toggleOpRow(row);
+        });
+
+        document.getElementById('opTableBody').addEventListener('keydown', function(e) {
+            if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+            const row = e.target.closest('tr.op-row');
+            if (row && e.target === row) {
+                e.preventDefault();
+                toggleOpRow(row);
+            }
+        });
+
+        document.getElementById('detailFilterClear').addEventListener('click', function() {
+            detailFilter = null;
+            renderDetailTable();
+        });
+
         function displayResults() {
             // Calculate summary stats
             const totalShipments = processedData.length;
@@ -1186,24 +1523,35 @@
             const sortedOps = Object.entries(opScores)
                 .sort((a, b) => b[1].totalPoints - a[1].totalPoints);
 
-            // Populate OP table
-            const opRows = sortedOps.map(([opName, data], index) =>
-                '<tr>' +
-                    '<td><strong>' + (index + 1) + '</strong></td>' +
-                    '<td><strong>' + esc(opName) + '</strong></td>' +
-                    '<td>' + num(data.shipments) + '</td>' +
-                    '<td class="feu-col">' + fmtFeu(data.feu) + '</td>' +
-                    '<td class="points">' + data.totalPoints.toFixed(1) + '</td>' +
-                '</tr>'
-            );
+            // Populate OP table: a clickable summary row plus its hidden drill-down
+            const opRows = [];
+            sortedOps.forEach(function(entry, index) {
+                const opName = entry[0];
+                const data = entry[1];
+                const classes = 'op-row' +
+                    (index % 2 === 1 ? ' op-row--alt' : '') +
+                    (index < 3 ? ' is-top' : '');
+
+                opRows.push(
+                    '<tr class="' + classes + '" tabindex="0" role="button"' +
+                        ' aria-expanded="false" aria-controls="opDetail-' + index + '">' +
+                        '<td><strong>' + (index + 1) + '</strong></td>' +
+                        '<td>' + CHEVRON + '<strong>' + esc(opName) + '</strong></td>' +
+                        '<td>' + num(data.shipments) + '</td>' +
+                        '<td class="feu-col">' + fmtFeu(data.feu) + '</td>' +
+                        '<td class="points">' + data.totalPoints.toFixed(1) + '</td>' +
+                    '</tr>'
+                );
+                opRows.push(buildBreakdown(opName, data, index));
+            });
             document.getElementById('opTableBody').innerHTML = opRows.join('');
 
-            // Populate detail table
-            const detailRows = new Array(processedData.length);
+            // Cache one row of HTML per record so filtering never rebuilds strings
+            detailRowsHtml = new Array(processedData.length);
             for (let i = 0; i < processedData.length; i++) {
                 const record = processedData[i];
                 const badgeClass = record.type === 'rail' ? 'badge-rail' : (record.type === 'cfs' ? 'badge-port' : 'badge-port');
-                detailRows[i] =
+                detailRowsHtml[i] =
                     '<tr>' +
                         '<td>' + esc(record.fileNo) + '</td>' +
                         '<td><strong>' + esc(record.opName) + '</strong></td>' +
@@ -1216,7 +1564,7 @@
             }
 
             setStatus('Rendering results…');
-            renderRows(document.getElementById('detailTableBody'), detailRows, 'Rendered', function() {
+            renderDetailTable(function() {
                 document.getElementById('resultsSection').style.display = 'block';
                 hideLoading();
             });
